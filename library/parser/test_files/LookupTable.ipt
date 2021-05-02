@@ -1,0 +1,8 @@
+Table: Table_Name
+Type: Lookup
+Default: default
+1-2: entry 1
+3-5: entry 2
+6-9: entry 3
+
+garbage text

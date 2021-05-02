@@ -1,0 +1,9 @@
+Table: Table1
+1: entry 1
+2: entry 2
+
+Table: Table2
+type: Lookup
+1: entry 3
+2-4: entry 4
+5: entry 5
