@@ -11,7 +11,6 @@ import {
   PowerOperator,
 } from "./expression";
 import { functionMap, ExpressionFunction } from "./functions";
-import { EvalText } from "./models";
 import { findMatchingBracket } from "./parser";
 
 const INTEGER = "[1-9][0-9]*";
@@ -23,35 +22,48 @@ export function parseExpression(
   level = 0
 ): [Expression, number] {
   let outExpression = new Expression();
+  // TODO clean this
+  outExpression.terms = [];
   let parseLength = 0;
   let innerLength = 0;
   let activeText = parseText;
+  let activeTerm: Term;
+  let activeOperator: Operator | undefined;
+  let active = true;
   if (parseText === "") {
     throw new ParserError("Empty expression");
   }
   try {
-    [outExpression.leftTerm, innerLength] = parseTerm(parseText, level);
-    // move the active text forward
-    activeText = parseText.slice(innerLength);
-    parseLength += innerLength;
-    [outExpression.operator, innerLength] = parseOperator(activeText);
-    activeText = activeText.slice(innerLength);
-    parseLength += innerLength;
-    if (innerLength == 0) {
-      // no operator, this expression only has a single term
-      outExpression.isNumeric = outExpression.leftTerm.isNumeric;
-      outExpression.generateEval();
-      return [outExpression, parseLength];
+    while (active) {
+      [activeTerm, innerLength] = parseTerm(activeText, level);
+      if (innerLength === 0) {
+        // TODO: this might be a parser error
+        active = false;
+        break;
+      }
+      outExpression.terms = outExpression.terms.concat(activeTerm);
+      activeText = activeText.slice(innerLength);
+      parseLength += innerLength;
+      // Try to parse an operator
+      [activeOperator, innerLength] = parseOperator(activeText);
+      if (innerLength === 0) {
+        // no operator detected: this expression is complete
+        active = false;
+        break;
+      }
+      outExpression.operators = outExpression.operators.concat(activeOperator);
+      activeText = activeText.slice(innerLength);
+      parseLength += innerLength;
     }
-    [outExpression.rightTerm, innerLength] = parseTerm(activeText, level);
-    activeText = activeText.slice(innerLength);
-    parseLength += innerLength;
     outExpression.level = level;
-    outExpression.isNumeric =
-      outExpression.leftTerm.isNumeric && outExpression.rightTerm.isNumeric;
+    outExpression.isNumeric = outExpression.terms.reduce(
+      (acc: boolean, term: Term) => {
+        return acc && term.isNumeric;
+      },
+      true
+    );
     outExpression.generateEval();
   } catch (error) {
-    console.log(`error ${error}`);
   } finally {
     return [outExpression, parseLength];
   }
@@ -68,7 +80,7 @@ export function parseTerm(parseText: string, level = 0): [Term, number] {
   let parseLength = 0;
 
   if (numberMatch !== null) {
-    // simple numeric value
+    // simple numeric value detected
     parseLength = numberMatch[0].length;
     const value = parseFloat(numberMatch.groups["value"]);
     outTerm.evaluate = () => value;
@@ -76,18 +88,23 @@ export function parseTerm(parseText: string, level = 0): [Term, number] {
     outTerm.level = level;
     return [outTerm, parseLength];
   } else if (parseText[0] == "(") {
+    // in this case parse an inner group, find the end of this group and parse
+    // it as a sub-expression
     let [innerText, parseLength] = findMatchingBracket(
       parseText.slice(1),
       "(",
       ")"
     );
+    // inner exression level is lower than this
     let [termExpression] = parseExpression(innerText, level + 1);
+    // return the inner group and the parse Length +2 (for the parens)
     return [termExpression, parseLength + 2];
   } else if (parseText[0] == "'" || parseText[0] == '"') {
     // TODO text expressions
     [outTerm, parseLength] = parseStringTerm(parseText, parseText[0]);
     outTerm.level = level;
   } else {
+    // Assume we've found a variable expression
     [outTerm, parseLength] = parseVariableFunction(parseText, level);
     outTerm.level = level;
   }

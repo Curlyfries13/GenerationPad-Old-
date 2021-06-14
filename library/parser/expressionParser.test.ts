@@ -1,5 +1,12 @@
 import { parseExpression, parseTerm } from "./expressionParser";
-import { Expression, AddOperator, SubtractOperator, Term } from "./expression";
+import {
+  Expression,
+  AddOperator,
+  SubtractOperator,
+  MultiplyOperator,
+  DivideOperator,
+  Term,
+} from "./expression";
 
 describe("parses expressions correctly", () => {
   const testCases = [
@@ -7,10 +14,13 @@ describe("parses expressions correctly", () => {
       testCaseText: "parses addition correctly",
       parseText: "1+2",
       expected: {
-        leftTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        operator: new AddOperator(),
-        rightTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true, level: 0 },
+          { evaluate: expect.any(Function), isNumeric: true, level: 0 },
+        ],
+        operators: [new AddOperator()],
         isNumeric: true,
+        level: 0,
       },
       parseLength: 3,
       eval: 3,
@@ -19,9 +29,11 @@ describe("parses expressions correctly", () => {
       testCaseText: "parses subtraction correctly",
       parseText: "1-32",
       expected: {
-        leftTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        operator: new SubtractOperator(),
-        rightTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new SubtractOperator()],
         isNumeric: true,
       },
       parseLength: 4,
@@ -31,9 +43,11 @@ describe("parses expressions correctly", () => {
       testCaseText: "parses multiplication correctly",
       parseText: "3*5",
       expected: {
-        leftTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        operator: new SubtractOperator(),
-        rightTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new MultiplyOperator()],
         isNumeric: true,
       },
       parseLength: 3,
@@ -43,9 +57,11 @@ describe("parses expressions correctly", () => {
       testCaseText: "parses groups correctly",
       parseText: "3*(1+3)",
       expected: {
-        leftTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        operator: new SubtractOperator(),
-        rightTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new MultiplyOperator()],
         isNumeric: true,
       },
       parseLength: 7,
@@ -55,10 +71,11 @@ describe("parses expressions correctly", () => {
       testCaseText: "parses sparse expressions correctly",
       parseText: "3 + 4",
       expected: {
-        leftTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        operator: new SubtractOperator(),
-        rightTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        isNumeric: true,
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new AddOperator()],
       },
       parseLength: 5,
       eval: 7,
@@ -67,29 +84,76 @@ describe("parses expressions correctly", () => {
       testCaseText: "parses sparse expressions with multiple operators",
       parseText: "3 + 4 + 3",
       expected: {
-        leftTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        operator: new SubtractOperator(),
-        rightTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        isNumeric: true,
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new AddOperator(), new AddOperator()],
       },
       parseLength: 9,
       eval: 10,
     },
     {
-      testCaseText: "parses expressions with multiple operators and proper order",
+      testCaseText:
+        "parses expressions with multiple operators and proper order",
       parseText: "3 + 4 * 3",
       expected: {
-        leftTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        operator: new SubtractOperator(),
-        rightTerm: { evaluate: expect.any(Function), isNumeric: true } as Term,
-        isNumeric: true,
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new AddOperator(), new MultiplyOperator()],
       },
       parseLength: 9,
-      eval: 10,
+      eval: 15,
+    },
+    {
+      testCaseText: "parses expressions with multiple sub-expressions",
+      parseText: "(1+3)*(5-3) + 11",
+      expected: {
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new MultiplyOperator(), new AddOperator()],
+      },
+      parseLength: 16,
+      eval: 19,
+    },
+    {
+      testCaseText: "parses division correctly",
+      parseText: "10/2",
+      expected: {
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new DivideOperator()],
+        isNumeric: true,
+      },
+      parseLength: 4,
+      eval: 5,
+    },
+    {
+      testCaseText: "parses division with remainders correctly",
+      parseText: "4/3",
+      expected: {
+        terms: [
+          { evaluate: expect.any(Function), isNumeric: true },
+          { evaluate: expect.any(Function), isNumeric: true },
+        ],
+        operators: [new DivideOperator()],
+        isNumeric: true,
+      },
+      parseLength: 3,
+      eval: 4.0 / 3.0,
     },
   ];
   testCases.forEach((test) => {
-    it(test.testCaseText, () => {
+    it(`${test.testCaseText}: ${test.parseText} `, () => {
       const result = parseExpression(test.parseText);
       expect(result[0]).toMatchObject(test.expected);
       expect(result[1]).toStrictEqual(test.parseLength);

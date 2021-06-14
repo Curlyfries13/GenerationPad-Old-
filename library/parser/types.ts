@@ -52,7 +52,7 @@ export interface TableCall {
   hasVarAssign: boolean;
 }
 
-// TODO: deterimine if a promis-like would be better suited here
+// TODO: deterimine if a promise-like would be better suited here
 export interface evaluatable {
   (scope?: {}): string | number;
 }

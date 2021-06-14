@@ -1,8 +1,6 @@
 import {
   Entry,
-  evaluatable,
   Filter,
-  FilterNames,
   TableType,
   TableCall,
 } from "./types";
