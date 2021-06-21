@@ -30,6 +30,7 @@ import { Dice } from "./dice";
 
 import { scope as scope1 } from "./test_scopes/parse_call_1";
 import { scope as scope2 } from "./test_scopes/parse_call_2";
+import { scope as pickScope1 } from "./test_scopes/parse_pick_1";
 
 // This file tests several sub-components of the parser
 
@@ -420,12 +421,30 @@ describe("parses sub-table rolls correctly", () => {
 });
 
 describe("parses sub-table picks correctly", () => {
-  testCases = [
+  const testCases = [
     {
-      testCaseText: "parses",
-      parseText: "SomeTable",
+      testCaseText: "parses simple sub-table pick on default table",
+      parseText: "someTable",
+      expected: "test1",
+      scope: pickScope1,
+      scopeVars: [],
+      scopeVarsResults: [],
     },
   ];
+  testCases.forEach((test) => {
+    it(`${test.testCaseText}`, () => {
+      const result = parseSubTablePick(test.parseText);
+      expect(test.expected.includes(String(result.evaluate(test.scope)))).toBe(
+        true
+      );
+      test.scopeVars.forEach((variable: string, index: number): void => {
+        expect(test.scope.variables.hasOwnProperty(variable)).toBe(true);
+        expect(test.scope.variables[variable]).toEqual(
+          test.scopeVarsResults[index]
+        );
+      });
+    });
+  });
 });
 
 describe("parses table roll commands", () => {

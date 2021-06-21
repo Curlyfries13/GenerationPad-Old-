@@ -515,7 +515,6 @@ export function parseSubTableRoll(text: string): EvalText {
     });
     if (tableCall.tableRoll) {
       rollTimes = parseInt(tableCall.rollValue()) ?? 1;
-      console.log(`parse sub table roll, rollTimes: ${rollTimes}`);
     }
     for (let i = 0; i < rollTimes; i++) {
       // TODO: catch if table not found
@@ -529,7 +528,6 @@ export function parseSubTableRoll(text: string): EvalText {
       results = results.concat(result);
     }
     out = results.join("");
-    console.log(`parse sub table roll, result: ${out}`);
     // TODO: refactor and consolidate logic between this and parseSubTablePick
     // NOTE: scope variable assignment here
     if (tableCall.hasVarAssign) {
@@ -566,12 +564,14 @@ export function parseSubTablePick(text: string): EvalText {
     // TODO implement a sub-table pick default using the current table's index.
     let pick: string | number = 1;
     let table = scope._tables.find((element: Table) => {
-      element.title === tableCall.tableName;
+      return element.title === tableCall.tableName;
     });
     if (tableCall.tableRoll) {
+      // TODO: catch if table not found
       // in this case, we need to pick whatever selection called here
       pick = tableCall.rollValue();
     }
+    console.log(`parseTableCall: ${JSON.stringify(table)}`);
     out = table.pick(pick)(scope);
     if (tableCall.filterStack.length > 0) {
       for (let filter of tableCall.filterStack) {
@@ -587,6 +587,7 @@ export function parseSubTablePick(text: string): EvalText {
     }
     return out;
   };
+  return out;
 }
 
 export function parseSubTableDeckPick(text: string) {
