@@ -31,6 +31,7 @@ export class Table implements iTable {
   deckPick: () => evaluatable;
   picks: number[];
 
+  // TODO: make a more convenient constructor
   constructor() {
     this.title = "";
     this.tableType = TableType.Weighted;
@@ -110,12 +111,12 @@ export class Table implements iTable {
         break;
       default:
         this.roll = (inRoll: string | number | undefined) => {
-          // ignore inRoll
-          let roll = this.defaultRoll.roll();
+          // per spec this ignore inRoll
+          let roll = this.defaultRoll.roll()[0];
           for (let entry of this.entries) {
             if (
-              entry.lookupEnd - entry.weight >= index &&
-              entry.lookupEnd <= index
+              entry.lookupEnd - entry.weight <= roll &&
+              entry.lookupEnd >= roll
             ) {
               return entry.text.evaluate;
             }
@@ -239,6 +240,8 @@ export class Generator {
   }
 
   run(): string {
-    return this.defaultTable ? this.defaultTable.roll()(this.scope) : "";
+    return this.defaultTable
+      ? String(this.defaultTable.roll()(this.scope))
+      : "";
   }
 }

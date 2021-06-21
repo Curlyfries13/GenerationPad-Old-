@@ -16,10 +16,20 @@ import { findMatchingBracket } from "./parser";
 const INTEGER = "[1-9][0-9]*";
 const DECIMAL = "[1-9][0-9]*\\.[0-9]*";
 
-// parse the inside of an expression within curly brackets: {}
+/**
+ * Parse the inside of an expression within curly brackets: {}
+ *
+ * @param {string} [parseText] - the plaintext to be parsed
+ * @param {number} [level] - the depth of this parse, used to stop too deeply
+ * recursive calls
+ * @throws {ParserError} - throws empty expression parser error if no expression
+ * is passed
+ * @return {[Expression, number]} the Expression object created from this text,
+ * followed by the number of characters parsed
+ */
 export function parseExpression(
-  parseText = "",
-  level = 0
+  parseText: string = "",
+  level: number = 0
 ): [Expression, number] {
   let outExpression = new Expression();
   // TODO clean this
@@ -41,7 +51,7 @@ export function parseExpression(
         active = false;
         break;
       }
-      outExpression.terms = outExpression.terms.concat(activeTerm);
+      outExpression.terms = outExpression.terms.concat([activeTerm]);
       activeText = activeText.slice(innerLength);
       parseLength += innerLength;
       // Try to parse an operator
@@ -51,7 +61,9 @@ export function parseExpression(
         active = false;
         break;
       }
-      outExpression.operators = outExpression.operators.concat(activeOperator);
+      outExpression.operators = outExpression.operators.concat([
+        activeOperator,
+      ]);
       activeText = activeText.slice(innerLength);
       parseLength += innerLength;
     }

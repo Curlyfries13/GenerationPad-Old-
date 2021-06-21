@@ -149,7 +149,7 @@ describe("parses expressions correctly", () => {
         isNumeric: true,
       },
       parseLength: 3,
-      eval: 4.0 / 3.0,
+      eval: 4.0 / 3,
     },
   ];
   testCases.forEach((test) => {

@@ -1,0 +1,13 @@
+Table: Primary
+[@Secondary]
+
+Table: Secondary
+test [@Tertiary1]
+[@Tertiary2] tested
+
+
+Table: Tertiary1
+A
+
+Table: Tertiary2
+B

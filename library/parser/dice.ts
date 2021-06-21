@@ -97,7 +97,7 @@ export class Dice implements iDice {
     let outResult;
 
     for (let i = 0; i < this.magnitude; i++) {
-      baseDice.concat(getRandomInt(1, this.sides));
+      baseDice.push(getRandomInt(1, this.sides));
     }
 
     outResultsList = baseDice;
