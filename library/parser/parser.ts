@@ -508,11 +508,14 @@ export function parseSubTableRoll(text: string): EvalText {
     let out = "";
     let rollTimes = 1;
     // get the table we roll on
+    // TODO: if there if there is no table that matches this, then we need to
+    // indicate and return (missing)
     let table = scope._tables.find((element: Table) => {
       return element.title === tableCall.tableName;
     });
     if (tableCall.tableRoll) {
       rollTimes = parseInt(tableCall.rollValue()) ?? 1;
+      console.log(`parse sub table roll, rollTimes: ${rollTimes}`);
     }
     for (let i = 0; i < rollTimes; i++) {
       // TODO: catch if table not found
@@ -525,7 +528,8 @@ export function parseSubTableRoll(text: string): EvalText {
       }
       results = results.concat(result);
     }
-    out = results.join(" ");
+    out = results.join("");
+    console.log(`parse sub table roll, result: ${out}`);
     // TODO: refactor and consolidate logic between this and parseSubTablePick
     // NOTE: scope variable assignment here
     if (tableCall.hasVarAssign) {

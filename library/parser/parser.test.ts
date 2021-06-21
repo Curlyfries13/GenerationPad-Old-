@@ -394,6 +394,14 @@ describe("parses sub-table rolls correctly", () => {
       scopeVars: ["var"],
       scopeVarsResults: ["test1"],
     },
+    {
+      testCaseText: "parses a simple table roll rolled several times",
+      parseText: "3 someTable",
+      expected: ["test1test1test1"],
+      scope: scope1,
+      scopeVars: [],
+      scopeVarsResults: [],
+    },
   ];
   testCases.forEach((test) => {
     it(`${test.testCaseText}`, () => {
@@ -409,6 +417,15 @@ describe("parses sub-table rolls correctly", () => {
       });
     });
   });
+});
+
+describe("parses sub-table picks correctly", () => {
+  testCases = [
+    {
+      testCaseText: "parses",
+      parseText: "SomeTable",
+    },
+  ];
 });
 
 describe("parses table roll commands", () => {
